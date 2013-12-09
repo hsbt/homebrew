@@ -150,6 +150,10 @@ module OS
         version < "4.3"
       end
 
+      def provides_cvs?
+        version < "5.0"
+      end
+
       def default_prefix?
         if version < "4.3"
           %r{^/Developer} === prefix
@@ -169,11 +173,16 @@ module OS
 
       # True if:
       #  - Xcode < 4.3 is installed. The tools are found under /usr.
-      #  - The "Command Line Tools" package has been installed
-      #    For OS X < 10.9, the tools are found under /usr. For 10.9,
-      #    they are found under /Library/Developer/CommandLineTools.
+      #  - The "Command Line Tools" package has been installed.
+      #    For OS X < 10.9, the tools are found under /usr. 10.9 always
+      #    includes tools there, which run the real tools inside Xcode on
+      #    Xcode-only installs, so it's necessary to look elsewhere.
       def installed?
-        mavericks_dev_tools? || usr_dev_tools?
+        if MacOS.version < :mavericks
+          usr_dev_tools?
+        else
+          mavericks_dev_tools?
+        end
       end
 
       def mavericks_dev_tools?
