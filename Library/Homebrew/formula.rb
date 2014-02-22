@@ -16,7 +16,7 @@ class Formula
   include Utils::Inreplace
   extend BuildEnvironmentDSL
 
-  attr_reader :name, :path, :homepage, :downloader, :build
+  attr_reader :name, :path, :homepage, :build
   attr_reader :stable, :bottle, :devel, :head, :active_spec
 
   # The current working directory during builds and tests.
@@ -30,10 +30,9 @@ class Formula
   attr_reader :cxxstdlib
 
   # Homebrew determines the name
-  def initialize name='__UNKNOWN__', path=nil
+  def initialize name='__UNKNOWN__', path=self.class.path(name)
     @name = name
-    # If we got an explicit path, use that, else determine from the name
-    @path = path.nil? ? self.class.path(name) : Pathname.new(path).expand_path
+    @path = path
     @homepage = self.class.homepage
 
     set_spec :stable
@@ -53,7 +52,6 @@ class Formula
 
     @active_spec = determine_active_spec
     validate_attributes :url, :name, :version
-    @downloader = active_spec.downloader
     @build = determine_build_options
 
     @pin = FormulaPin.new(self)
@@ -118,6 +116,14 @@ class Formula
 
   def requirements
     active_spec.requirements
+  end
+
+  def cached_download
+    active_spec.cached_download
+  end
+
+  def clear_cache
+    active_spec.clear_cache
   end
 
   # if the dir is there, but it's empty we consider it not installed
@@ -193,14 +199,6 @@ class Formula
 
   def opt_prefix
     Pathname.new("#{HOMEBREW_PREFIX}/opt/#{name}")
-  end
-
-  def cached_download
-    downloader.cached_location
-  end
-
-  def clear_cache
-    downloader.clear_cache
   end
 
   # Can be overridden to selectively disable bottles from formulae.
@@ -349,11 +347,8 @@ class Formula
   alias_method :python2, :python
   alias_method :python3, :python
 
-  # Generates a formula's ruby class name from a formula's name
   def self.class_s name
-    # remove invalid characters and then camelcase it
-    name.capitalize.gsub(/[-_.\s]([a-zA-Z0-9])/) { $1.upcase } \
-                   .gsub('+', 'x')
+    Formulary.class_s(name)
   end
 
   # an array of all Formula names
