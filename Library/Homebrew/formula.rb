@@ -56,7 +56,7 @@ class Formula
 
     @pin = FormulaPin.new(self)
 
-    @cxxstdlib ||= Set.new
+    @cxxstdlib = Set.new
   end
 
   def set_spec(name)
@@ -638,7 +638,7 @@ class Formula
   # Explicitly request changing C++ standard library compatibility check
   # settings. Use with caution!
   def cxxstdlib_check check_type
-    @cxxstdlib << check_type
+    cxxstdlib << check_type
   end
 
   def self.method_added method
