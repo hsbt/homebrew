@@ -137,6 +137,9 @@ class FormulaAuditor
     f.deps.each do |dep|
       begin
         dep_f = dep.to_formula
+      rescue TapFormulaUnavailableError
+        # Don't complain about missing cross-tap dependencies
+        next
       rescue FormulaUnavailableError
         problem "Can't find dependency #{dep.name.inspect}."
         next
@@ -180,7 +183,7 @@ class FormulaAuditor
   def audit_conflicts
     f.conflicts.each do |c|
       begin
-        Formula.factory(c.name)
+        Formulary.factory(c.name)
       rescue FormulaUnavailableError
         problem "Can't find conflicting formula #{c.name.inspect}."
       end
@@ -296,8 +299,16 @@ class FormulaAuditor
       problem "use \"scons *args\" instead of \"system 'scons', *args\""
     end
 
-    if text =~ /system\s+['"]xcodebuild/ && text !~ /SYMROOT=/
-      problem "xcodebuild should be passed an explicit \"SYMROOT\""
+    if text =~ /system\s+['"]xcodebuild/
+      problem %{use "xcodebuild *args" instead of "system 'xcodebuild', *args"}
+    end
+
+    if text =~ /xcodebuild[ (]["'*]/ && text !~ /SYMROOT=/
+      problem %{xcodebuild should be passed an explicit "SYMROOT"}
+    end
+
+    if text =~ /Formula\.factory\(/
+      problem "\"Formula.factory(name)\" is deprecated in favor of \"Formula[name]\""
     end
   end
 
