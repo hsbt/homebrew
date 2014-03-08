@@ -4,6 +4,7 @@ class Freediameter < Formula
   homepage 'http://www.freediameter.net'
   url 'http://www.freediameter.net/hg/freeDiameter/archive/1.2.0.tar.gz'
   sha1 '687bd9d551eb4261c3600fcbe35ea519b711e9f7'
+  revision 2
 
   head 'http://www.freediameter.net/hg/freeDiameter', :using => :hg
 
@@ -67,7 +68,7 @@ class Freediameter < Formula
         <string>#{plist_name}</string>
         <key>ProgramArguments</key>
         <array>
-          <string>#{opt_prefix}/bin/freeDiameterd</string>
+          <string>#{opt_bin}/freeDiameterd</string>
         </array>
         <key>KeepAlive</key>
         <dict>
