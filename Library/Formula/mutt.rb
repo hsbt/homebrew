@@ -2,9 +2,15 @@ require 'formula'
 
 class Mutt < Formula
   homepage 'http://www.mutt.org/'
-  url 'ftp://ftp.mutt.org/mutt/devel/mutt-1.5.22.tar.gz'
-  mirror 'https://bitbucket.org/mutt/mutt/downloads/mutt-1.5.22.tar.gz'
-  sha1 '728a114cb3a44df373dbf1292fc34dd8321057dc'
+  url 'ftp://ftp.mutt.org/mutt/mutt-1.5.23.tar.gz'
+  mirror 'https://bitbucket.org/mutt/mutt/downloads/mutt-1.5.23.tar.gz'
+  sha1 '8ac821d8b1e25504a31bf5fda9c08d93a4acc862'
+
+  bottle do
+    sha1 "18da37536ab216267e5240e79acab0eb550076d9" => :mavericks
+    sha1 "dabafeb01c0ad9669c13302c2898f4fee85a7cd4" => :mountain_lion
+    sha1 "0808c458478a316031e71ecb6c3d54e99b41781a" => :lion
+  end
 
   head do
     url 'http://dev.mutt.org/hg/mutt#default', :using => :hg
@@ -39,12 +45,12 @@ class Mutt < Formula
 
   def patches
     urls = [
-      ['with-trash-patch', 'http://patch-tracker.debian.org/patch/series/dl/mutt/1.5.21-6.4/features/trash-folder'],
+      ['with-trash-patch', 'http://patch-tracker.debian.org/patch/series/dl/mutt/1.5.21-6.2+deb7u1/features/trash-folder'],
       # original source for this went missing, patch sourced from Arch at
       # https://aur.archlinux.org/packages/mutt-ignore-thread/
       ['with-ignore-thread-patch', 'https://gist.github.com/mistydemeo/5522742/raw/1439cc157ab673dc8061784829eea267cd736624/ignore-thread-1.5.21.patch'],
       ['with-pgp-verbose-mime-patch',
-          'http://patch-tracker.debian.org/patch/series/dl/mutt/1.5.21-6.4/features-old/patch-1.5.4.vk.pgp_verbose_mime'],
+          'http://patch-tracker.debian.org/patch/series/dl/mutt/1.5.21-6.2+deb7u1/features-old/patch-1.5.4.vk.pgp_verbose_mime'],
       ['with-confirm-attachment-patch', 'https://gist.github.com/tlvince/5741641/raw/c926ca307dc97727c2bd88a84dcb0d7ac3bb4bf5/mutt-attach.patch'],
     ]
 
