@@ -174,7 +174,6 @@ class FormulaInstaller
         stdlibs = Keg.new(f.prefix).detect_cxx_stdlibs :skip_executables => true
         tab = Tab.for_keg f.prefix
         tab.poured_from_bottle = true
-        tab.tabfile.delete if tab.tabfile
         tab.write
       end
     rescue => e
@@ -200,7 +199,7 @@ class FormulaInstaller
   # HACK: If readline is present in the dependency tree, it will clash
   # with the stdlib's Readline module when the debugger is loaded
   def perform_readline_hack
-    if f.recursive_dependencies.any? { |d| d.name == "readline" } && debug?
+    if (f.recursive_dependencies.any? { |d| d.name == "readline" } || f.name == "readline") && debug?
       ENV['HOMEBREW_NO_READLINE'] = '1'
     end
   end
@@ -351,7 +350,7 @@ class FormulaInstaller
   def install_dependency(dep, inherited_options)
     df = dep.to_formula
 
-    outdated_keg = Keg.new(df.linked_keg.realpath) rescue nil
+    outdated_keg = Keg.new(df.linked_keg.realpath) if df.linked_keg.directory?
 
     fi = DependencyInstaller.new(df)
     fi.options           |= Tab.for_formula(df).used_options
@@ -551,10 +550,11 @@ class FormulaInstaller
 
   def install_plist
     return unless f.plist
-    # A plist may already exist if we are installing from a bottle
-    f.plist_path.unlink if f.plist_path.exist?
-    f.plist_path.write f.plist
+    f.plist_path.atomic_write(f.plist)
     f.plist_path.chmod 0644
+  rescue Exception => e
+    onoe "Failed to install plist file"
+    ohai e, e.backtrace if debug?
   end
 
   def fix_install_names
