@@ -417,7 +417,7 @@ class Formula
     # test if the name is a formula alias
     possible_alias = Pathname.new("#{HOMEBREW_LIBRARY}/Aliases/#{name}")
     if possible_alias.file?
-      return possible_alias.realpath.basename('.rb').to_s
+      return possible_alias.resolved_path.basename(".rb").to_s
     end
 
     # test if the name is a cached downloaded formula
@@ -493,7 +493,7 @@ class Formula
       },
       "revision" => revision,
       "installed" => [],
-      "linked_keg" => (linked_keg.realpath.basename.to_s if linked_keg.exist?),
+      "linked_keg" => (linked_keg.resolved_path.basename.to_s if linked_keg.exist?),
       "keg_only" => keg_only?,
       "dependencies" => deps.map(&:name),
       "conflicts_with" => conflicts.map(&:name),
@@ -572,7 +572,7 @@ class Formula
     logfn = "#{logd}/%02d.%s" % [@exec_count, File.basename(cmd).split(' ').first]
     mkdir_p(logd)
 
-    fork do
+    pid = fork do
       ENV['HOMEBREW_CC_LOG_PATH'] = logfn
 
       # TODO system "xcodebuild" is deprecated, this should be removed soon.
@@ -603,7 +603,7 @@ class Formula
         puts buf if ARGV.verbose?
       end
 
-      Process.wait
+      Process.wait(pid)
 
       $stdout.flush
 
