@@ -2,25 +2,15 @@ require 'formula'
 
 class Ffmpeg < Formula
   homepage 'http://ffmpeg.org/'
-
-  stable do
-    url 'http://ffmpeg.org/releases/ffmpeg-2.2.1.tar.bz2'
-    sha1 'c5f8d103b20cd73d329401d85ced4a014757f8b9'
-
-    patch do
-      # fixes an api incompability with latest x265 0.9, to be removed with next ffmpeg 2.2.x+ release
-      url "http://git.videolan.org/?p=ffmpeg.git;a=patch;h=d67dbfa7c195fabce706ca03c439419450f9bd8a"
-      sha1 'f9481393869a8f38912faf935fb584c8e41d5c50'
-    end
-  end
+  url 'http://ffmpeg.org/releases/ffmpeg-2.2.2.tar.bz2'
+  sha1 '8a4f282ccb5efbec31a9747d12c8d7b07c481f2e'
 
   head 'git://git.videolan.org/ffmpeg.git'
 
   bottle do
-    revision 1
-    sha1 "481c5c8f83b914719e633dc5f35e156e1b026d88" => :mavericks
-    sha1 "c0753de98914bd6a2d053b24c2cdb6ea92ac2f9c" => :mountain_lion
-    sha1 "b620f59e56a7b2013d5401456862eaa64321d2ec" => :lion
+    sha1 "3d92cc6e39cb4a931ba0ef6086a3facccc2a4fb6" => :mavericks
+    sha1 "abdf840749997229d507bb21096b4950430b2664" => :mountain_lion
+    sha1 "65b6fee763e85df649addbe2232e0dec810c7365" => :lion
   end
 
   option "without-x264", "Disable H.264 encoder"
@@ -119,6 +109,8 @@ class Ffmpeg < Formula
     # For 32-bit compilation under gcc 4.2, see:
     # http://trac.macports.org/ticket/20938#comment:22
     ENV.append_to_cflags "-mdynamic-no-pic" if Hardware.is_32_bit? && Hardware::CPU.intel? && ENV.compiler == :clang
+
+    ENV["GIT_DIR"] = cached_download/".git" if build.head?
 
     system "./configure", *args
 
