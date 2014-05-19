@@ -1,4 +1,5 @@
 TAP_MIGRATIONS = {
+  "agedu" => "homebrew/headonly",
   "aimage" => "homebrew/boneyard",
   "aws-iam-tools" => "homebrew/boneyard",
   "apple-gcc42" => "homebrew/versions",
@@ -40,7 +41,9 @@ TAP_MIGRATIONS = {
   "slicot" => "homebrew/science",
   "shark" => "homebrew/boneyard",
   "solfege" => "homebrew/boneyard",
+  "storm" => "homebrew/boneyard",
   "syslog-ng" => "homebrew/boneyard",
+  "tetgen" => "homebrew/science",
   "urweb" => "homebrew/boneyard",
   "wkhtmltopdf" => "homebrew/boneyard",
 }
