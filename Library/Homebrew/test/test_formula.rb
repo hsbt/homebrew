@@ -1,9 +1,7 @@
 require 'testing_env'
 require 'test/testball'
 
-class FormulaTests < Test::Unit::TestCase
-  include VersionAssertions
-
+class FormulaTests < Homebrew::TestCase
   def test_formula_instantiation
     klass = Class.new(Formula) { url "http://example.com/foo-1.0.tar.gz" }
     name = "formula_name"
@@ -29,17 +27,17 @@ class FormulaTests < Test::Unit::TestCase
   def test_installed?
     f = TestBall.new
     f.stubs(:installed_prefix).returns(stub(:directory? => false))
-    assert !f.installed?
+    refute_predicate f, :installed?
 
     f.stubs(:installed_prefix).returns(
       stub(:directory? => true, :children => [])
     )
-    assert !f.installed?
+    refute_predicate f, :installed?
 
     f.stubs(:installed_prefix).returns(
       stub(:directory? => true, :children => [stub])
     )
-    assert f.installed?
+    assert_predicate f, :installed?
   end
 
   def test_installed_prefix
@@ -133,15 +131,15 @@ class FormulaTests < Test::Unit::TestCase
   def test_inequality
     x = TestBall.new("foo")
     y = TestBall.new("bar")
-    assert_not_equal x, y
-    assert_not_equal y, x
-    assert_not_equal x.hash, y.hash
+    refute_equal x, y
+    refute_equal y, x
+    refute_equal x.hash, y.hash
     assert !x.eql?(y)
     assert !y.eql?(x)
   end
 
   def test_comparison_with_non_formula_objects_does_not_raise
-    assert_not_equal TestBall.new, Object.new
+    refute_equal TestBall.new, Object.new
   end
 
   def test_class_naming
