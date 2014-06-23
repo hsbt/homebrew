@@ -6,8 +6,9 @@ class FormulaTests < Homebrew::TestCase
     klass = Class.new(Formula) { url "http://example.com/foo-1.0.tar.gz" }
     name = "formula_name"
     path = Formula.path(name)
+    spec = :stable
 
-    f = klass.new(name, path)
+    f = klass.new(name, path, spec)
     assert_equal name, f.name
     assert_equal path, f.path
     assert_raises(ArgumentError) { klass.new }
@@ -91,9 +92,7 @@ class FormulaTests < Homebrew::TestCase
   end
 
   def test_installed_prefix_head_active_spec
-    ARGV.stubs(:build_head? => true)
-
-    f = formula do
+    f = formula("test", Pathname.new(__FILE__).expand_path, :head) do
       head 'foo'
       devel do
         url 'foo'
@@ -105,9 +104,7 @@ class FormulaTests < Homebrew::TestCase
   end
 
   def test_installed_prefix_devel_active_spec
-    ARGV.stubs(:build_devel? => true)
-
-    f = formula do
+    f = formula("test", Pathname.new(__FILE__).expand_path, :devel) do
       head 'foo'
       devel do
         url 'foo'
@@ -168,7 +165,7 @@ class FormulaTests < Homebrew::TestCase
       bottle { sha1 TEST_SHA1 => bottle_tag }
 
       def initialize
-        super "test", Pathname.new(__FILE__).expand_path
+        super "test", Pathname.new(__FILE__).expand_path, :stable
       end
     end.new
 
@@ -198,7 +195,7 @@ class FormulaTests < Homebrew::TestCase
         end
       }
     end
-    assert_kind_of Formula, Formula.factory(name)
+    assert_kind_of Formula, Formulary.factory(name)
   ensure
     path.unlink
   end
@@ -243,9 +240,7 @@ class FormulaTests < Homebrew::TestCase
   end
 
   def test_head_ignores_revisions
-    ARGV.stubs(:build_head?).returns(true)
-
-    f = formula do
+    f = formula("test", Pathname.new(__FILE__).expand_path, :head) do
       url 'foo-1.0.bar'
       revision 1
       head 'foo'

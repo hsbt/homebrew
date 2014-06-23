@@ -1,6 +1,6 @@
 require "metafiles"
 
-module Homebrew extend self
+module Homebrew
   def list
 
     # Use of exec means we don't explicitly exit
@@ -11,7 +11,6 @@ module Homebrew extend self
     return unless HOMEBREW_CELLAR.exist?
 
     if ARGV.include? '--pinned'
-      require 'formula'
       list_pinned
     elsif ARGV.include? '--versions'
       list_versions
