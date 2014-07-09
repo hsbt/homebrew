@@ -247,6 +247,10 @@ class Formula
     self.class.skip_clean_paths.include? to_check
   end
 
+  def skip_cxxstdlib_check?
+    self.class.cxxstdlib.include?(:skip)
+  end
+
   # yields self with current working directory set to the uncompressed tarball
   def brew
     validate_attributes :name, :version
@@ -301,14 +305,18 @@ class Formula
   def hash
     name.hash
   end
-  def <=> b
-    name <=> b.name
+
+  def <=>(other)
+    return unless Formula === other
+    name <=> other.name
   end
+
   def to_s
     name
   end
+
   def inspect
-    name
+    "#<#{self.class.name}: #{path}>"
   end
 
   # Standard parameters for CMake builds.
@@ -400,7 +408,7 @@ class Formula
   end
 
   def env
-    @env ||= self.class.env
+    self.class.env
   end
 
   def conflicts

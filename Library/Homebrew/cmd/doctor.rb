@@ -27,7 +27,7 @@ class Volumes
   def get_mounts path=nil
     vols = []
     # get the volume of path, if path is nil returns all volumes
-    raw_df = IO.popen("/bin/df -P #{path}", "rb", &:read)
+    raw_df = Utils.popen_read("/bin/df", "-P", path, &:read)
     raw_df.split("\n").each do |line|
       case line
       # regex matches: /dev/disk0s2   489562928 440803616  48247312    91%    /
@@ -891,16 +891,16 @@ end
 
 def check_missing_deps
   return unless HOMEBREW_CELLAR.exist?
-  s = Set.new
+  missing = Set.new
   Homebrew.missing_deps(Formula.installed).each_value do |deps|
-    s.merge deps
+    missing.merge(deps)
   end
 
-  if s.length > 0 then <<-EOS.undent
+  if missing.any? then <<-EOS.undent
     Some installed formula are missing dependencies.
     You should `brew install` the missing dependencies:
 
-        brew install #{s.to_a.sort * " "}
+        brew install #{missing.sort_by(&:name) * " "}
 
     Run `brew missing` for more details.
     EOS

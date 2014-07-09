@@ -2,9 +2,9 @@ require 'formula'
 
 class AndroidSdk < Formula
   homepage 'http://developer.android.com/index.html'
-  url 'http://dl.google.com/android/android-sdk_r23-macosx.zip'
-  version '23'
-  sha1 '7119841e5fcadd8ef2b75c1fe419c4cbc9a97336'
+  url 'http://dl.google.com/android/android-sdk_r23.0.2-macosx.zip'
+  version '23.0.2'
+  sha1 '1ef502577ca4403ae81f3d68c1813995cb412354'
 
   conflicts_with 'android-platform-tools',
     :because => "The Android Platform-Tools need to be installed as part of the SDK."
@@ -22,12 +22,28 @@ class AndroidSdk < Formula
   def install
     prefix.install 'tools', 'SDK Readme.txt' => 'README'
 
-    %w[android apkbuilder ddms dmtracedump draw9patch etc1tool emulator
-    emulator-arm emulator-x86 hierarchyviewer hprof-conv lint mksdcard
-    monitor monkeyrunner traceview zipalign].each do |tool|
+    %w[android ddms draw9patch emulator
+    emulator-arm emulator-x86 hierarchyviewer lint mksdcard
+    monitor monkeyrunner traceview].each do |tool|
       (bin/tool).write <<-EOS.undent
         #!/bin/bash
         TOOL="#{prefix}/tools/#{tool}"
+        exec "$TOOL" "$@"
+      EOS
+    end
+
+    %w[zipalign].each do |tool|
+      (bin/tool).write <<-EOS.undent
+        #!/bin/bash
+        TOOL="#{prefix}/build-tools/#{build_tools_version}/#{tool}"
+        exec "$TOOL" "$@"
+      EOS
+    end
+
+    %w[dmtracedump etc1tool hprof-conv].each do |tool|
+      (bin/tool).write <<-EOS.undent
+        #!/bin/bash
+        TOOL="#{prefix}/platform-tools/#{tool}"
         exec "$TOOL" "$@"
       EOS
     end
