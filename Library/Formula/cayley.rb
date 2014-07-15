@@ -7,9 +7,10 @@ class Cayley < Formula
   head "https://github.com/google/cayley.git"
 
   bottle do
-    sha1 "e213257e0c4b1b5c83c9ae74fb8fe5856d1bd366" => :mavericks
-    sha1 "87fe92bafb4bcd3e2b46421d6576934a40ac1b4e" => :mountain_lion
-    sha1 "de2e7e46e8f9e5d3688e5cce227bcb95b55970d2" => :lion
+    revision 1
+    sha1 "10d398eaaf1d7016f20cb179e6fc5aaddc78d5b5" => :mavericks
+    sha1 "7929ce3816e78fbab798c2fb95aab0352b6a127e" => :mountain_lion
+    sha1 "5bd96b3602df9fd6dac235dfb6545a19e110ed5f" => :lion
   end
 
   depends_on "bazaar" => :build
@@ -54,25 +55,34 @@ class Cayley < Formula
     system "go", "build", "-o", "cayley"
 
     # Create sample configuration that uses the Homebrew-based directories
-    inreplace "cayley.cfg.example", "/tmp/cayley_test", "#{var}/cayley/data.nt"
+    inreplace "cayley.cfg.example", "/tmp/cayley_test", "#{var}/cayley"
 
     # Install binary and configuration
     bin.install "cayley"
     etc.install "cayley.cfg.example" => "cayley.conf"
 
-    # Create data directory
-    (var/"cayley").mkpath
+    # Copy over the static web assets
+    (share/'cayley/assets').install "docs", "static", "templates"
 
     if build.with? "samples"
       system "gzip", "-d", "30kmoviedata.nt.gz"
 
       # Copy over sample data
-      (share/'cayley/samples').install "testdata.nt"
-      (share/'cayley/samples').install "30kmoviedata.nt"
+      (share/'cayley/samples').install "testdata.nt", "30kmoviedata.nt"
     end
   end
 
-  plist_options :manual => "cayley --config=#{HOMEBREW_PREFIX}/etc/cayley.conf"
+  def post_install
+    unless File.exist? "#{var}/cayley"
+      # Create data directory
+      (var/"cayley").mkpath
+
+      # Initialize the Cayley database
+      system "#{bin}/cayley", "init", "--config=#{etc}/cayley.conf"
+    end
+  end
+
+  plist_options :manual => "cayley http --assets=#{HOMEBREW_PREFIX}/share/cayley/assets --config=#{HOMEBREW_PREFIX}/etc/cayley.conf"
 
   def plist; <<-EOS.undent
     <?xml version="1.0" encoding="UTF-8"?>
@@ -89,6 +99,8 @@ class Cayley < Formula
         <key>ProgramArguments</key>
         <array>
           <string>#{opt_bin}/cayley</string>
+          <string>http</string>
+          <string>--assets=#{share}/cayley/assets</string>
           <string>--config=#{etc}/cayley.conf</string>
         </array>
         <key>RunAtLoad</key>
