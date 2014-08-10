@@ -878,7 +878,7 @@ end
 
 def check_for_other_frameworks
   # Other frameworks that are known to cause problems when present
-  %w{Mono.framework expat.framework libexpat.framework}.
+  %w{expat.framework libexpat.framework}.
     map{ |frmwrk| "/Library/Frameworks/#{frmwrk}" }.
     select{ |frmwrk| File.exist? frmwrk }.
     map do |frmwrk| <<-EOS.undent
@@ -1006,7 +1006,7 @@ def check_for_non_prefixed_coreutils
 end
 
 def check_for_non_prefixed_findutils
-  default_names = Tab.for_name('findutils').used_options.include? 'default-names'
+  default_names = Tab.for_name('findutils').include? 'default-names'
   if default_names then <<-EOS.undent
     Putting non-prefixed findutils in your path can cause python builds to fail.
     EOS

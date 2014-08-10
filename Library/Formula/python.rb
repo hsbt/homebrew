@@ -24,14 +24,14 @@ class Python < Formula
   depends_on "gdbm" => :recommended
   depends_on "openssl"
   depends_on "homebrew/dupes/tcl-tk" if build.with? "brewed-tk"
-  depends_on :x11 if build.with? "brewed-tk" and Tab.for_name("tcl-tk").used_options.include?("with-x11")
+  depends_on :x11 if build.with? "brewed-tk" and Tab.for_name("tcl-tk").with? "x11"
 
   skip_clean "bin/pip", "bin/pip-2.7"
   skip_clean "bin/easy_install", "bin/easy_install-2.7"
 
   resource "setuptools" do
-    url "https://pypi.python.org/packages/source/s/setuptools/setuptools-5.3.tar.gz"
-    sha1 "da2da9324a539029ebea602120afcb8cfd24ddf6"
+    url "https://pypi.python.org/packages/source/s/setuptools/setuptools-5.4.2.tar.gz"
+    sha1 "a681ba56c30c0eb66528215842d3e3fcb5157614"
   end
 
   resource "pip" do
