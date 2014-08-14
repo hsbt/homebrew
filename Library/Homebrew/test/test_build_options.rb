@@ -1,18 +1,12 @@
-require 'testing_env'
-require 'build_options'
+require "testing_env"
+require "build_options"
+require "options"
 
 class BuildOptionsTests < Homebrew::TestCase
   def setup
-    args = %w{--with-foo --with-bar --without-qux}
-    opts = Options.new
-    opts << Option.new("with-foo") << Option.new("with-bar")
-    opts << Option.new("without-baz") << Option.new("without-qux")
+    args = Options.create(%w(--with-foo --with-bar --without-qux))
+    opts = Options.create(%w(--with-foo --with-bar --without-baz --without-qux))
     @build = BuildOptions.new(args, opts)
-  end
-
-  def test_as_flags
-    assert_equal %w{--with-foo --with-bar --without-baz --without-qux}.sort,
-      @build.as_flags.sort
   end
 
   def test_include
@@ -35,11 +29,5 @@ class BuildOptionsTests < Homebrew::TestCase
 
   def test_unused_options
     assert_includes @build.unused_options, "--without-baz"
-  end
-
-  def test_copies_do_not_share_underlying_args
-    orig = BuildOptions.new [], Options.new
-    copy = orig.dup
-    refute_same orig.args, copy.args
   end
 end

@@ -34,7 +34,7 @@ class SoftwareSpec
     @bottle_specification = BottleSpecification.new
     @patches = []
     @options = Options.new
-    @build = BuildOptions.new(ARGV.options_only, options)
+    @build = BuildOptions.new(Options.create(ARGV.options_only), options)
   end
 
   def owner= owner
@@ -126,10 +126,6 @@ class SoftwareSpec
     elsif dep.recommended? && !option_defined?("without-#{name}")
       options << Option.new("without-#{name}", "Build without #{name} support")
     end
-  end
-
-  def add_legacy_options(list)
-    list.each { |opt, desc| options << Option.new(opt[/^--(.+)$/, 1], desc) }
   end
 end
 

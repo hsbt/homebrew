@@ -25,6 +25,7 @@ class Formula
   attr_reader :buildpath, :testpath
 
   attr_accessor :local_bottle_path
+  attr_accessor :build
 
   def initialize(name, path, spec)
     @name = name
@@ -37,8 +38,8 @@ class Formula
 
     @active_spec = determine_active_spec(spec)
     validate_attributes :url, :name, :version
-    active_spec.add_legacy_options(options)
     @pkg_version = PkgVersion.new(version, revision)
+    @build = active_spec.build
     @pin = FormulaPin.new(self)
   end
 
@@ -102,12 +103,12 @@ class Formula
     active_spec.patches
   end
 
-  def option_defined?(name)
-    active_spec.option_defined?(name)
+  def options
+    active_spec.options
   end
 
-  def build
-    active_spec.build
+  def option_defined?(name)
+    active_spec.option_defined?(name)
   end
 
   # if the dir is there, but it's empty we consider it not installed
@@ -212,9 +213,6 @@ class Formula
 
   # tell the user about any caveats regarding this package, return a string
   def caveats; nil end
-
-  # any e.g. configure options for this package
-  def options; [] end
 
   # Deprecated
   DATA = :DATA
@@ -444,7 +442,7 @@ class Formula
       "caveats" => caveats
     }
 
-    hsh["options"] = build.map { |opt|
+    hsh["options"] = options.map { |opt|
       { "option" => opt.flag, "description" => opt.description }
     }
 
@@ -455,7 +453,7 @@ class Formula
 
         hsh["installed"] << {
           "version" => keg.version.to_s,
-          "used_options" => tab.used_options.map(&:flag),
+          "used_options" => tab.used_options.as_flags,
           "built_as_bottle" => tab.built_bottle,
           "poured_from_bottle" => tab.poured_from_bottle
         }
@@ -592,6 +590,16 @@ class Formula
       raise "You cannot override Formula#brew in class #{name}"
     when :test
       @test_defined = true
+    when :options
+      instance = allocate
+
+      specs.each do |spec|
+        instance.options.each do |opt, desc|
+          spec.option(opt[/^--(.+)$/, 1], desc)
+        end
+      end
+
+      remove_method(:options)
     end
   end
 
