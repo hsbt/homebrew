@@ -4,25 +4,25 @@ class Dart < Formula
   homepage 'https://www.dartlang.org/'
 
   if MacOS.prefer_64_bit?
-    url 'https://storage.googleapis.com/dart-archive/channels/stable/release/38663/sdk/dartsdk-macos-x64-release.zip'
-    sha1 'fc214070863861e444b0a9619dd92a93c0932bc9'
+    url 'https://storage.googleapis.com/dart-archive/channels/stable/release/39553/sdk/dartsdk-macos-x64-release.zip'
+    sha256 '98fba491b86e70d7fc44ed69977b365b96f9d7d79a3a95a89553df9aafaf7f81'
   else
-    url 'https://storage.googleapis.com/dart-archive/channels/stable/release/38663/sdk/dartsdk-macos-ia32-release.zip'
-    sha1 'd6d2ba9950f3625d15c39814c183364dcd46b945'
+    url 'https://storage.googleapis.com/dart-archive/channels/stable/release/39553/sdk/dartsdk-macos-ia32-release.zip'
+    sha256 '2ad33e57098fb567c6b627d149899ad301de88f03edc92c74611956642eca382'
   end
 
-  version '1.5.8'
+  version '1.6.0'
 
   devel do
     if MacOS.prefer_64_bit?
-      url 'https://storage.googleapis.com/dart-archive/channels/dev/release/38831/sdk/dartsdk-macos-x64-release.zip'
-      sha1 'ed2bc149a6bb5c8b48b8d818269c0be392dc8361'
+      url 'https://storage.googleapis.com/dart-archive/channels/dev/release/39537/sdk/dartsdk-macos-x64-release.zip'
+      sha256 '5042082e881e3d074728045e01e6adc4a351e76945fdec0f3a9164e76475308b'
     else
-      url 'https://storage.googleapis.com/dart-archive/channels/dev/release/38831/sdk/dartsdk-macos-ia32-release.zip'
-      sha1 'fccba1c2289faaa83b596f7335e107c7b581e2fe'
+      url 'https://storage.googleapis.com/dart-archive/channels/dev/release/39537/sdk/dartsdk-macos-ia32-release.zip'
+      sha256 '87b98b2e0be44930ad2aaa09c5042aa9b15618e37c6e7df1739f6a786b464d51'
     end
 
-    version '1.6.0-dev.7.0'
+    version '1.6.0-dev.9.7'
   end
 
   def install

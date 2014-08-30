@@ -5,11 +5,13 @@ class Stunnel < Formula
   url 'ftp://ftp.nluug.nl/pub/networking/stunnel/stunnel-5.03.tar.gz'
   mirror 'https://www.stunnel.org/downloads/stunnel-5.03.tar.gz'
   sha256 '9a1e369466fa756e6f48b11480a3338c1fa4717e6472871bf4a3a96c483edd03'
+  revision 1
 
   bottle do
-    sha1 "b5a47e0ac9fa6510dd122b8d0d5f2a5502991945" => :mavericks
-    sha1 "50462ab843dcc83a3bafca80195c17687b91cd0a" => :mountain_lion
-    sha1 "65db862ec43ab76646e75f5498b7c53ccb2d7d3c" => :lion
+    revision 1
+    sha1 "560fb470ee761838b54ad3c1e6e6cfc6011a6101" => :mavericks
+    sha1 "b4832f43acadd4066ffa34db80564a0986dec770" => :mountain_lion
+    sha1 "354ebe408784c4d104339f4f25a40c38b7f9fc62" => :lion
   end
 
   depends_on "openssl"

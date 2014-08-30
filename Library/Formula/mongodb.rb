@@ -4,11 +4,13 @@ class Mongodb < Formula
   homepage "http://www.mongodb.org/"
   url "http://downloads.mongodb.org/src/mongodb-src-r2.6.4.tar.gz"
   sha1 "16dda6d8b1156194fc09b5ad72e58612d06abada"
+  revision 1
 
   bottle do
-    sha1 "3c4dbe78cb9a2f424c3a8097ac58506a44eca310" => :mavericks
-    sha1 "d703fc432fdab74f8a5719916e90b2d169d7a66c" => :mountain_lion
-    sha1 "19f8563ca909b71f0306bad92f4bf585f54f2c11" => :lion
+    revision 1
+    sha1 "f0d3195b48bbfa726f7c263a841610f5e96d3527" => :mavericks
+    sha1 "d4cb743f2d8bd7c72846f361199e5e6021724d9f" => :mountain_lion
+    sha1 "d03344c6d6bea73d8480af83b32f0337d35df5d9" => :lion
   end
 
   devel do
@@ -54,15 +56,14 @@ class Mongodb < Formula
   end
 
   def mongodb_conf; <<-EOS.undent
-    # Store data in #{var}/mongodb instead of the default /data/db
-    dbpath = #{var}/mongodb
-
-    # Append logs to #{var}/log/mongodb/mongo.log
-    logpath = #{var}/log/mongodb/mongo.log
-    logappend = true
-
-    # Only accept local connections
-    bind_ip = 127.0.0.1
+    systemLog:
+      destination: file
+      path: #{var}/log/mongodb/mongo.log
+      logAppend: true
+    storage:
+      dbPath: #{var}/mongodb
+    net:
+      bindIp: 127.0.0.1
     EOS
   end
 
