@@ -571,6 +571,7 @@ class Formula
 
     $stdout.reopen(out)
     $stderr.reopen(out)
+    out.close
     args.collect!{|arg| arg.to_s}
     exec(cmd, *args) rescue nil
     puts "Failed to execute: #{cmd}"
@@ -589,7 +590,7 @@ class Formula
     active_spec.add_legacy_patches(patches)
     return if patchlist.empty?
 
-    active_spec.patches.grep(DATAPatch).each { |p| p.path = path }
+    active_spec.patches.grep(DATAPatch) { |p| p.path = path }
 
     active_spec.patches.select(&:external?).each do |patch|
       patch.verify_download_integrity(patch.fetch)
