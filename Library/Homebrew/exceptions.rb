@@ -79,46 +79,33 @@ class OperationInProgressError < RuntimeError
   end
 end
 
-module Homebrew
-  class InstallationError < RuntimeError
-    attr_reader :formula
-
-    def initialize(formula, message)
-      super message
-      @formula = formula
-    end
-  end
-end
-
 class CannotInstallFormulaError < RuntimeError; end
 
 class FormulaAlreadyInstalledError < RuntimeError; end
 
-class FormulaInstallationAlreadyAttemptedError < Homebrew::InstallationError
+class FormulaInstallationAlreadyAttemptedError < RuntimeError
   def initialize(formula)
-    super formula, "Formula installation already attempted: #{formula}"
+    super "Formula installation already attempted: #{formula.name}"
   end
 end
 
-class UnsatisfiedRequirements < Homebrew::InstallationError
-  attr_reader :reqs
-
-  def initialize formula, reqs
-    @reqs = reqs
-    message = (reqs.length == 1) \
-                ? "An unsatisfied requirement failed this build." \
-                : "Unsatisifed requirements failed this build."
-    super formula, message
+class UnsatisfiedRequirements < RuntimeError
+  def initialize(reqs)
+    if reqs.length == 1
+      super "An unsatisfied requirement failed this build."
+    else
+      super "Unsatisified requirements failed this build."
+    end
   end
 end
 
-class FormulaConflictError < Homebrew::InstallationError
-  attr_reader :conflicts
+class FormulaConflictError < RuntimeError
+  attr_reader :formula, :conflicts
 
   def initialize(formula, conflicts)
-    @conflicts = conflicts
     @formula = formula
-    super formula, message
+    @conflicts = conflicts
+    super message
   end
 
   def conflict_message(conflict)
@@ -144,13 +131,14 @@ class FormulaConflictError < Homebrew::InstallationError
   end
 end
 
-class BuildError < Homebrew::InstallationError
-  attr_reader :env
+class BuildError < RuntimeError
+  attr_reader :formula, :env
 
   def initialize(formula, cmd, args, env)
+    @formula = formula
     @env = env
     args = args.map{ |arg| arg.to_s.gsub " ", "\\ " }.join(" ")
-    super formula, "Failed executing: #{cmd} #{args}"
+    super "Failed executing: #{cmd} #{args}"
   end
 
   def issues
@@ -187,7 +175,7 @@ class BuildError < Homebrew::InstallationError
       Homebrew.dump_build_env(env)
       puts
       onoe "#{formula.name} #{formula.version} did not build"
-      unless (logs = Dir["#{HOMEBREW_LOGS}/#{formula}/*"]).empty?
+      unless (logs = Dir["#{HOMEBREW_LOGS}/#{formula.name}/*"]).empty?
         puts "Logs:"
         puts logs.map{|fn| "     #{fn}"}.join("\n")
       end
@@ -202,13 +190,13 @@ end
 
 # raised by CompilerSelector if the formula fails with all of
 # the compilers available on the user's system
-class CompilerSelectionError < Homebrew::InstallationError
-  def initialize formula
-    super formula, <<-EOS.undent
-    #{formula.name} cannot be built with any available compilers.
-    To install this formula, you may need to:
-      brew install gcc
-    EOS
+class CompilerSelectionError < RuntimeError
+  def initialize(formula)
+    super <<-EOS.undent
+      #{formula.name} cannot be built with any available compilers.
+      To install this formula, you may need to:
+        brew install gcc
+      EOS
   end
 end
 
@@ -226,7 +214,12 @@ end
 class CurlDownloadStrategyError < RuntimeError; end
 
 # raised by safe_system in utils.rb
-class ErrorDuringExecution < RuntimeError; end
+class ErrorDuringExecution < RuntimeError
+  def initialize(cmd, args=[])
+    args = args.map { |a| a.to_s.gsub " ", "\\ " }.join(" ")
+    super "Failure while executing: #{cmd} #{args}"
+  end
+end
 
 # raised by Pathname#verify_checksum when "expected" is nil or empty
 class ChecksumMissingError < ArgumentError; end
@@ -251,7 +244,7 @@ end
 
 class ResourceMissingError < ArgumentError
   def initialize(formula, resource)
-    super "#{formula} does not define resource #{resource.inspect}"
+    super "#{formula.name} does not define resource #{resource.inspect}"
   end
 end
 
