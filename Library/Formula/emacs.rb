@@ -20,15 +20,25 @@ class Emacs < Formula
       url 'bzr://http://bzr.savannah.gnu.org/r/emacs/trunk'
     end
 
-    depends_on :autoconf
-    depends_on :automake
+    depends_on "autoconf" => :build
+    depends_on "automake" => :build
+    depends_on "glib" => :optional
+  end
+
+  devel do
+    url 'http://alpha.gnu.org/gnu/emacs/pretest/emacs-24.4-rc1.tar.xz'
+    sha256 '47e391170db4ca0a3c724530c7050655f6d573a711956b4cd84693c194a9d4fd'
+    version '24.4-rc1'
+
+    depends_on "autoconf" => :build
+    depends_on "automake" => :build
     depends_on "glib" => :optional
   end
 
   stable do
     if build.include? "cocoa"
-      depends_on :autoconf
-      depends_on :automake
+      depends_on "autoconf" => :build
+      depends_on "automake" => :build
     end
 
     # Fix default-directory on Cocoa and Mavericks.
@@ -55,10 +65,10 @@ class Emacs < Formula
     end if build.include? "cocoa" and build.include? "japanese"
   end
 
-  depends_on 'pkg-config' => :build
+  depends_on "pkg-config" => :build
   depends_on :x11 if build.with? "x"
   depends_on "d-bus" => :optional
-  depends_on 'gnutls' => :optional
+  depends_on "gnutls" => :optional
   depends_on "librsvg" => :optional
   depends_on "imagemagick" => :optional
   depends_on "mailutils" => :optional
@@ -79,7 +89,7 @@ class Emacs < Formula
 
   def install
     # HEAD builds blow up when built in parallel as of April 20 2012
-    ENV.deparallelize if build.head?
+    ENV.deparallelize unless build.stable?
 
     args = ["--prefix=#{prefix}",
             "--enable-locallisppath=#{HOMEBREW_PREFIX}/share/emacs/site-lisp",
@@ -90,21 +100,21 @@ class Emacs < Formula
     else
       args << "--without-dbus"
     end
-    if build.with? 'gnutls'
-      args << '--with-gnutls'
+    if build.with? "gnutls"
+      args << "--with-gnutls"
     else
-      args << '--without-gnutls'
+      args << "--without-gnutls"
     end
     args << "--with-rsvg" if build.with? "librsvg"
     args << "--with-imagemagick" if build.with? "imagemagick"
     args << "--without-popmail" if build.with? "mailutils"
 
-    system "./autogen.sh" if build.head?
+    system "./autogen.sh" unless build.stable?
 
     if build.include? "cocoa"
       # Patch for color issues described here:
       # http://debbugs.gnu.org/cgi/bugreport.cgi?bug=8402
-      if build.include? "srgb" and not build.head?
+      if build.include? "srgb" and build.stable?
         inreplace "src/nsterm.m",
           "*col = [NSColor colorWithCalibratedRed: r green: g blue: b alpha: 1.0];",
           "*col = [NSColor colorWithDeviceRed: r green: g blue: b alpha: 1.0];"
@@ -113,7 +123,7 @@ class Emacs < Formula
       args << "--with-ns" << "--disable-ns-self-contained"
       system "./configure", *args
       system "make"
-      system "make install"
+      system "make", "install"
       prefix.install "nextstep/Emacs.app"
 
       # Don't cause ctags clash.
@@ -130,7 +140,7 @@ class Emacs < Formula
         # These libs are not specified in xft's .pc. See:
         # https://trac.macports.org/browser/trunk/dports/editors/emacs/Portfile#L74
         # https://github.com/Homebrew/homebrew/issues/8156
-        ENV.append 'LDFLAGS', '-lfreetype -lfontconfig'
+        ENV.append "LDFLAGS", "-lfreetype -lfontconfig"
         args << "--with-x"
         args << "--with-gif=no" << "--with-tiff=no" << "--with-jpeg=no"
       else
@@ -139,7 +149,7 @@ class Emacs < Formula
 
       system "./configure", *args
       system "make"
-      system "make install"
+      system "make", "install"
 
       # Don't cause ctags clash.
       do_not_install_ctags
@@ -153,7 +163,7 @@ class Emacs < Formula
         A command line wrapper for the cocoa app was installed to:
          #{bin}/emacs
       EOS
-      if build.include? "srgb" and build.head?
+      if build.include? "srgb" and not build.stable?
         s << "\nTo enable sRGB, use (setq ns-use-srgb-colorspace t)"
       end
     end

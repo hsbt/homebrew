@@ -154,25 +154,17 @@ class FormulaInstaller
 
     @@attempted << f
 
-    begin
-      if pour_bottle? :warn => true
+    if pour_bottle?(:warn => true)
+      begin
         pour
+      rescue => e
+        raise if ARGV.homebrew_developer?
+        @pour_failed = true
+        onoe e.message
+        opoo "Bottle installation failed: building from source."
+      else
         @poured_bottle = true
-
-        CxxStdlib.check_compatibility(
-          f, f.recursive_dependencies,
-          Keg.new(f.prefix), MacOS.default_compiler
-        )
-
-        tab = Tab.for_keg f.prefix
-        tab.poured_from_bottle = true
-        tab.write
       end
-    rescue => e
-      raise e if ARGV.homebrew_developer?
-      @pour_failed = true
-      onoe e.message
-      opoo "Bottle installation failed: building from source."
     end
 
     build_bottle_preinstall if build_bottle?
@@ -378,14 +370,7 @@ class FormulaInstaller
   def caveats
     return if only_deps?
 
-    if ARGV.homebrew_developer? and not f.keg_only?
-      audit_bin
-      audit_sbin
-      audit_lib
-      audit_man
-      audit_info
-      audit_include
-    end
+    audit_installed if ARGV.homebrew_developer? and not f.keg_only?
 
     c = Caveats.new(f)
 
@@ -635,45 +620,28 @@ class FormulaInstaller
       path.cp_path_sub(f.bottle_prefix, HOMEBREW_PREFIX)
     end
     FileUtils.rm_rf f.bottle_prefix
+
+    CxxStdlib.check_compatibility(
+      f, f.recursive_dependencies,
+      Keg.new(f.prefix), MacOS.default_compiler
+    )
+
+    tab = Tab.for_keg(f.prefix)
+    tab.poured_from_bottle = true
+    tab.write
   end
 
-  ## checks
-
-  def print_check_output warning_and_description
-    return unless warning_and_description
-    warning, description = *warning_and_description
-    opoo warning
-    puts description
-    @show_summary_heading = true
+  def audit_check_output(output)
+    if output
+      opoo output
+      @show_summary_heading = true
+    end
   end
 
-  def audit_bin
-    print_check_output(check_PATH(f.bin)) unless f.keg_only?
-    print_check_output(check_non_executables(f.bin))
-    print_check_output(check_generic_executables(f.bin))
-  end
-
-  def audit_sbin
-    print_check_output(check_PATH(f.sbin)) unless f.keg_only?
-    print_check_output(check_non_executables(f.sbin))
-    print_check_output(check_generic_executables(f.sbin))
-  end
-
-  def audit_lib
-    print_check_output(check_jars)
-    print_check_output(check_non_libraries)
-  end
-
-  def audit_man
-    print_check_output(check_manpages)
-  end
-
-  def audit_info
-    print_check_output(check_infopages)
-  end
-
-  def audit_include
-    print_check_output(check_shadowed_headers)
+  def audit_installed
+    audit_check_output(check_PATH(f.bin))
+    audit_check_output(check_PATH(f.sbin))
+    super
   end
 
   private
