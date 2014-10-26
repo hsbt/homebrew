@@ -2,12 +2,12 @@ require "formula"
 
 class Syncthing < Formula
   homepage "http://syncthing.net"
-  url "https://github.com/calmh/syncthing.git", :tag => "v0.10.1"
+  url "https://github.com/syncthing/syncthing.git", :tag => "v0.10.3"
 
   bottle do
-    sha1 "d6f3b070e9f43c2caba3bd630a150dd7195dfd4d" => :mavericks
-    sha1 "84f35ae41c48fc9f2a8830859e9fd562d0f9a026" => :mountain_lion
-    sha1 "4e9abc8e955640d89d22c43f39314d9b626a6e04" => :lion
+    sha1 "8239e9862e76460caf9e5c95a61a118df47584fa" => :yosemite
+    sha1 "0083bcd0df558ca9812aa307d6a9a3913312af19" => :mavericks
+    sha1 "2d6603aee28d990e02cee974167861cdb21e4721" => :mountain_lion
   end
 
   depends_on "go" => :build

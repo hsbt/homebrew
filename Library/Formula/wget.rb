@@ -11,10 +11,10 @@ class Wget < Formula
   revision 2
 
   bottle do
-    revision 1
-    sha1 "5e3dd7a6e79e4de274b1c1dc1baa6d8110a56000" => :mavericks
-    sha1 "f4e4664b78cfc1c515e791f3b2ffedf7207a2a22" => :mountain_lion
-    sha1 "217a42b233f21fcb693723f91ec6df0ae168609e" => :lion
+    revision 2
+    sha1 "173036d8c100beb821b6af936a8dfc562a8dad4c" => :yosemite
+    sha1 "825f0187d75ab9d42888901a43aae6104e834af9" => :mavericks
+    sha1 "71e28c9e7325a85668a9bb965ce67cbcc64a550b" => :mountain_lion
   end
 
   head do
@@ -26,8 +26,11 @@ class Wget < Formula
     depends_on "gettext"
   end
 
-  option "enable-iri", "Enable iri support"
-  option "enable-debug", "Build with debug support"
+  deprecated_option "enable-iri" => "with-iri"
+  deprecated_option "enable-debug" => "with-debug"
+
+  option "with-iri", "Enable iri support"
+  option "with-debug", "Build with debug support"
 
   depends_on "openssl"
   depends_on "libidn" if build.include? "enable-iri"

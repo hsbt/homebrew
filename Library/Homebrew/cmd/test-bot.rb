@@ -11,15 +11,14 @@
 # --email:        Generate an email subject file.
 # --no-bottle:    Run brew install without --build-bottle
 # --HEAD:         Run brew install with --HEAD
-# --local:        Ask Homebrew to write verbose logs under ./logs/
+# --local:        Ask Homebrew to write verbose logs under ./logs/ and set HOME to ./home/
 # --tap=<tap>:    Use the git repository of the given tap
 # --dry-run:      Just print commands, don't run them.
 #
 # --ci-master:         Shortcut for Homebrew master branch CI options.
 # --ci-pr:             Shortcut for Homebrew pull request CI options.
 # --ci-testing:        Shortcut for Homebrew testing CI options.
-# --ci-pr-upload:      Homebrew CI pull request bottle upload.
-# --ci-testing-upload: Homebrew CI testing bottle upload.
+# --ci-upload:         Homebrew CI bottle upload.
 
 require 'formula'
 require 'utils'
@@ -175,7 +174,7 @@ module Homebrew
       elsif formula
         @formulae = [argument]
       else
-        odie "#{argument} is not a pull request URL, commit URL or formula name."
+        raise ArgumentError.new("#{argument} is not a pull request URL, commit URL or formula name.")
       end
 
       @category = __method__
@@ -232,10 +231,12 @@ module Homebrew
         diff_start_sha1 = shorten_revision ENV['GIT_PREVIOUS_COMMIT']
         diff_end_sha1 = shorten_revision ENV['GIT_COMMIT']
         test "brew", "update" if current_branch == "master"
-      elsif @hash or @url
+      elsif @hash
         diff_start_sha1 = current_sha1
         test "brew", "update" if current_branch == "master"
         diff_end_sha1 = current_sha1
+      elsif @url
+        test "brew", "update" if current_branch == "master"
       end
 
       # Handle Jenkins pull request builder plugin.
@@ -257,7 +258,8 @@ module Homebrew
         diff_end_sha1 = @hash
         @name = @hash
       elsif @url
-        test "git", "checkout", current_sha1
+        diff_start_sha1 = current_sha1
+        test "git", "checkout", diff_start_sha1
         test "brew", "pull", "--clean", @url
         diff_end_sha1 = current_sha1
         @short_url = @url.gsub('https://github.com/', '')
@@ -535,10 +537,12 @@ module Homebrew
     end
 
     if ARGV.include? '--local'
+      ENV['HOME'] = "#{Dir.pwd}/home"
+      mkdir_p ENV['HOME']
       ENV['HOMEBREW_LOGS'] = "#{Dir.pwd}/logs"
     end
 
-    if ARGV.include? '--ci-pr-upload' or ARGV.include? '--ci-testing-upload'
+    if ARGV.include? '--ci-upload'
       jenkins = ENV['JENKINS_HOME']
       job = ENV['UPSTREAM_JOB_NAME']
       id = ENV['UPSTREAM_BUILD_ID']
@@ -561,10 +565,7 @@ module Homebrew
       safe_system "git", "checkout", "-f", "master"
       safe_system "git", "reset", "--hard", "origin/master"
       safe_system "brew", "update"
-
-      if ARGV.include? '--ci-pr-upload'
-        safe_system "brew", "pull", "--clean", pr
-      end
+      safe_system "brew", "pull", "--clean", pr if pr
 
       ENV["GIT_AUTHOR_NAME"] = ENV["GIT_COMMITTER_NAME"]
       ENV["GIT_AUTHOR_EMAIL"] = ENV["GIT_COMMITTER_EMAIL"]
@@ -595,8 +596,15 @@ module Homebrew
       tests << test
     else
       ARGV.named.each do |argument|
-        test = Test.new(argument, tap)
-        any_errors ||= !test.run
+        test_error = false
+        begin
+          test = Test.new(argument, tap)
+          test_error = !test.run
+        rescue ArgumentError => e
+          test_error = true
+          ofail e.message
+        end
+        any_errors ||= test_error
         tests << test
       end
     end

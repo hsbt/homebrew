@@ -7,9 +7,10 @@ class Node < Formula
   sha256 "c2120d0e3d2d191654cb11dbc0a33a7216d53732173317681da9502be0030f10"
 
   bottle do
-    sha1 "f9f083a1cf13cf3703c764d639702627968e2234" => :mavericks
-    sha1 "83a01d1079ed1bc02a7c9fc7cefa589027778b15" => :mountain_lion
-    sha1 "a2dbe4a3358e98813fbc6c83cfa79120177e6fc8" => :lion
+    revision 5
+    sha1 "2c9a3d216724479e319ed594c7c7019c9b2fbf40" => :yosemite
+    sha1 "21a907e9143e132ad08f424bbc98b472ee4d0042" => :mavericks
+    sha1 "a882dcc7e9bf4ed3dd55bf15c99921288df4e9ce" => :mountain_lion
   end
 
   devel do
@@ -55,8 +56,11 @@ class Node < Formula
     npmrc = npm_root/"npmrc"
     npmrc.atomic_write("prefix = #{HOMEBREW_PREFIX}\n")
 
+    # make sure npm can find node
+    ENV["PATH"] = "#{opt_bin}:#{ENV["PATH"]}"
+
     ENV["NPM_CONFIG_USERCONFIG"] = npmrc
-    npm_root.cd { system "make", "install" }
+    npm_root.cd { system "make", "VERBOSE=1", "install" }
     system "#{HOMEBREW_PREFIX}/bin/npm", "install", "--global", "npm@latest",
                                          "--prefix", HOMEBREW_PREFIX
 
@@ -89,6 +93,12 @@ class Node < Formula
     assert_equal "hello", output
     assert_equal 0, $?.exitstatus
 
-    system "#{HOMEBREW_PREFIX}/bin/npm", "install", "npm@latest" if build.with? "npm"
+    if build.with? "npm"
+      # make sure npm can find node
+      ENV.prepend_path "PATH", opt_bin
+      assert_equal which("node"), opt_bin/"node"
+      assert (HOMEBREW_PREFIX/"bin/npm").executable?, "npm must be executable"
+      system "#{HOMEBREW_PREFIX}/bin/npm", "--verbose", "install", "npm@latest"
+    end
   end
 end

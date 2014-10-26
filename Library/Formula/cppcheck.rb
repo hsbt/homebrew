@@ -2,15 +2,15 @@ require "formula"
 
 class Cppcheck < Formula
   homepage "http://sourceforge.net/apps/mediawiki/cppcheck/index.php?title=Main_Page"
-  url "https://github.com/danmar/cppcheck/archive/1.66.tar.gz"
-  sha1 "277a214aa8a2bf30180645aca09c1dc9d3069977"
+  url "https://github.com/danmar/cppcheck/archive/1.67.tar.gz"
+  sha1 "14b886e5cac631cec11a3f8efbdeaed15ddcc7d3"
 
   head "https://github.com/danmar/cppcheck.git"
 
   bottle do
-    sha1 "a3b2341260ab7afbb08dbf44e51b32d2edbd6d7c" => :mavericks
-    sha1 "e7290d70f4aee90d644898785eb4eff25fbbcd8b" => :mountain_lion
-    sha1 "ee30f858617e11e68d465d7406f445cf13d6f791" => :lion
+    sha1 "16d24ece4e95c8cecf8a79c3f63c326f33dc58cf" => :yosemite
+    sha1 "63a24e70db08ec69f50e5705b6dd4066cad51b36" => :mavericks
+    sha1 "7096f14ebc2826b151d61d573ef07841ae05cea1" => :mountain_lion
   end
 
   option "no-rules", "Build without rules (no pcre dependency)"

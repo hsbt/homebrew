@@ -108,6 +108,10 @@ class Formula
     active_spec.options
   end
 
+  def deprecated_options
+    active_spec.deprecated_options
+  end
+
   def option_defined?(name)
     active_spec.option_defined?(name)
   end
@@ -401,6 +405,13 @@ class Formula
       "Homebrew/homebrew"
     else
       "path or URL"
+    end
+  end
+
+  def print_tap_action options={}
+    if tap?
+      verb = options[:verb] || "Installing"
+      ohai "#{verb} #{name} from #{tap}"
     end
   end
 
@@ -712,6 +723,10 @@ class Formula
 
     def option name, description=""
       specs.each { |spec| spec.option(name, description) }
+    end
+
+    def deprecated_option hash
+      specs.each { |spec| spec.deprecated_option(hash) }
     end
 
     def patch strip=:p1, src=nil, &block
