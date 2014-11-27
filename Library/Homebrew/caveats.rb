@@ -7,7 +7,8 @@ class Caveats
 
   def caveats
     caveats = []
-    caveats << f.caveats if f.caveats.to_s.length > 0
+    s = f.caveats.to_s
+    caveats << s.chomp + "\n" if s.length > 0
     caveats << f.keg_only_text if f.keg_only? && f.respond_to?(:keg_only_text)
     caveats << bash_completion_caveats
     caveats << zsh_completion_caveats
@@ -107,7 +108,11 @@ class Caveats
       destination = f.plist_startup ? '/Library/LaunchDaemons' \
                                     : '~/Library/LaunchAgents'
 
-      plist_filename = f.plist_path.basename
+      plist_filename = if f.plist
+        f.plist_path.basename
+      else
+        File.basename Dir["#{keg}/*.plist"].first
+      end
       plist_link = "#{destination}/#{plist_filename}"
       plist_domain = f.plist_path.basename('.plist')
       destination_path = Pathname.new File.expand_path destination
